@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. FastAPI Backend Service (Lane 1 Depth Model & Lane 2 DSM Calibrator)
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: terravision_backend
+    restart: unless-stopped
+    environment:
+      - PORT=8000
+      - OPENTOPOGRAPHY_API_KEY=${OPENTOPOGRAPHY_API_KEY:-}
+    volumes:
+      # Persistent storage for user uploads and processed results
+      - ./backend/data:/app/data
+      # Mount model weights and code
+      - ./backend/model:/app/model
+      - ./backend/reference:/app/reference
+    networks:
+      - pravaah_net
+    expose:
+      - "8000"
+
+  # ----------------------------------------------------------------------------
+  # 2. React + Three.js 3D Frontend Service (Nginx Static Alpine)
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: terravision_frontend
+    restart: unless-stopped
+    networks:
+      - pravaah_net
+    expose:
+      - "80"
+
+networks:
+  pravaah_net:
+    external: true
+    name: pravaah_net
