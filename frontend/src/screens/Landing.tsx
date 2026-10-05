@@ -65,13 +65,13 @@ export const Landing: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="bg-amber-400 text-zinc-950 font-black px-2.5 py-1 brutal-border-sm text-sm uppercase">
-              SIH26175
+              TERRAVISION
             </span>
-            <Badge color="zinc">SMART INDIA HACKATHON</Badge>
-            <Badge color="purple">50% WEIGHTAGE VISUALIZER</Badge>
+            <Badge color="zinc">GEOSPATIAL PLATFORM</Badge>
+            <Badge color="purple">3D DSM ENGINE</Badge>
           </div>
           <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-zinc-950">
-            DepthWizard 3D
+            TerraVision
           </h1>
           <p className="text-zinc-600 font-mono text-xs md:text-sm mt-1">
             Single Aerial Image to Calibrated 3D Digital Surface Model & Fly-Through Engine
@@ -130,20 +130,20 @@ export const Landing: React.FC = () => {
           </div>
         </div>
 
-        {/* HACKATHON LIVE DEMO ONE-CLICK BUTTONS */}
+        {/* PRELOADED DEMO SAMPLES */}
         <Card
-          title="Instant Hackathon Demos (No File Needed)"
+          title="Preloaded Demo Datasets"
           subtitle="Test both relative and absolute calibration pipelines with 1 click"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <div className="p-4 bg-amber-50 brutal-border-sm flex flex-col justify-between space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-extrabold uppercase text-sm">Sample · PNG (Relative)</span>
+                  <span className="font-extrabold uppercase text-sm">Sample: PNG (Relative)</span>
                   <Badge color="yellow">AGL (METRES)</Badge>
                 </div>
                 <p className="text-xs font-mono text-zinc-600">
-                  Simulates a drone/aerial optical photo. Depth Anything V2 outputs per-pixel height above ground level (AGL) in metres.
+                  Drone or aerial optical photo. Fine-tuned GAMUS model outputs per-pixel height above ground level (AGL) in meters.
                 </p>
               </div>
               <Button
@@ -158,11 +158,11 @@ export const Landing: React.FC = () => {
             <div className="p-4 bg-cyan-50 brutal-border-sm flex flex-col justify-between space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-extrabold uppercase text-sm">Sample · GeoTIFF (Absolute)</span>
+                  <span className="font-extrabold uppercase text-sm">Sample: GeoTIFF (Absolute)</span>
                   <Badge color="green">CALIBRATED ASL</Badge>
                 </div>
                 <p className="text-xs font-mono text-zinc-600">
-                  Simulates georeferenced satellite tile. Ingests CRS (EPSG:32644), calibrates with SRTM terrain elevation for true sea-level DSM.
+                  Georeferenced satellite tile. Ingests CRS, classifies landscape (urban/veg/bare/water), and calibrates with SRTM terrain elevation for true sea-level DSM.
                 </p>
               </div>
               <Button
@@ -176,7 +176,7 @@ export const Landing: React.FC = () => {
           </div>
         </Card>
 
-        {/* JUDGES EVALUATION CRITERIA CARDS */}
+        {/* SYSTEM CAPABILITIES CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card title="Projection Fidelity" subtitle="Exact UV coordinate alignment">
             <p className="text-xs text-zinc-600 font-mono">
@@ -200,7 +200,7 @@ export const Landing: React.FC = () => {
 
       {/* FOOTER */}
       <footer className="max-w-6xl mx-auto w-full text-center text-xs font-mono text-zinc-500 border-t-2 border-zinc-950 pt-4">
-        DepthWizard · SIH26175 · Team GAMUS Elevation Visualizer · Ashutosh (Visualizer Lead)
+        TerraVision | High-Precision 3D DSM Fly-through Engine | Developed by Team Binary Bandits
       </footer>
     </div>
   );

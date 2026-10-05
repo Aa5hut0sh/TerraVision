@@ -1,26 +1,30 @@
-
+# Dependencies
 node_modules/
-/build
-/dist
-/out
+frontend/node_modules/
 .pnp
 .pnp.js
 
+# Build Outputs
+dist/
+/dist
+/build
+/out
+frontend/dist/
+frontend/dist-ssr/
+*.tsbuildinfo
 
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-*.tsbuildinfo
-
+# Python & Virtual Environments
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-
-
 .env
 .venv
 venv/
@@ -28,52 +32,50 @@ env/
 ENV/
 pyenv/
 .python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
 
-
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
+# Packaging
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
+# Explicit whitelist: ensure frontend library code is NEVER ignored
+!frontend/src/lib/
+!frontend/src/lib/**
 
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.dashboard-cache
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+# Backend runtime data & uploads
+backend/data/uploads/*
+backend/data/results/*
+!backend/data/uploads/.gitkeep
+!backend/data/results/.gitkeep
 
+# Large ML model checkpoints (>100MB exceeds GitHub push limit)
+# Note: Use Git LFS (git lfs track "*.pt") if you want to push weights to GitHub
+*.pt
+*.pth
+*.safetensors
+*.bin
+*.onnx
 
-*.sqlite3
-*.db
-
+# Environment & Credentials
 .env
 .env.local
 .env.*.local
 *.pem
 *.key
 
+# Databases
+*.sqlite3
+*.db
 
+# OS & Editor files
+.DS_Store
+Thumbs.db
 .vscode/
 .idea/
 *.suo
@@ -81,5 +83,3 @@ coverage.xml
 *.njsproj
 *.sln
 *.swp
-.DS_Store
-Thumbs.db

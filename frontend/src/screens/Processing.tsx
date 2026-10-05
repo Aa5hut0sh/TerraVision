@@ -165,7 +165,7 @@ export const Processing: React.FC = () => {
                 variant="secondary"
                 onClick={() => setScreen('viewer')}
                 icon={<ArrowRight className="w-5 h-5" />}
-                className="whitespace-nowrap bg-zinc-950 text-white hover:bg-zinc-900 border-white"
+                className="whitespace-nowrap  text-amber-900 hover:bg-amber-500 border-white"
               >
                 Launch 3D Fly-Through
               </Button>
@@ -228,7 +228,7 @@ export const Processing: React.FC = () => {
       </div>
 
       <footer className="max-w-6xl mx-auto w-full text-center text-xs font-mono text-zinc-500 pt-8">
-        DepthWizard · SIH26175 Hackathon
+        TerraVision | Developed by Team Binary Bandits
       </footer>
     </div>
   );

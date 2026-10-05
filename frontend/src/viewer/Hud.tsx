@@ -145,7 +145,7 @@ export const Hud: React.FC<HudProps> = ({ surface }) => {
     }
     const a = document.createElement('a');
     a.href = dataUrl;
-    a.download = `DepthWizard_${Date.now()}.png`;
+    a.download = `TerraVision_${Date.now()}.png`;
     a.click();
     showNotice('Screenshot downloaded!', 'success');
   };
@@ -245,12 +245,11 @@ export const Hud: React.FC<HudProps> = ({ surface }) => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-black uppercase tracking-tight">DepthWizard</h1>
-              <Badge color="zinc">SIH26175</Badge>
+              <h1 className="text-base font-black uppercase tracking-tight">TerraVision</h1>
               {isGeoTIFF ? (
                 <Badge color="green">ABS ELEV (ASL)</Badge>
               ) : (
-                <Badge color="yellow">AGL (METRES)</Badge>
+                <Badge color="yellow">AGL (METERS)</Badge>
               )}
               {dataset?.is_dummy && <Badge color="orange">DEMO DATA</Badge>}
             </div>
@@ -886,6 +885,26 @@ export const Hud: React.FC<HudProps> = ({ surface }) => {
                     <div className="flex justify-between">
                       <span>Terrain:</span>
                       <span className="font-bold">{dataset.metadata.terrain_source}</span>
+                    </div>
+                  )}
+
+                  {dataset?.metadata.landscape_classification && (
+                    <div className="pt-2 border-t border-zinc-200 space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-zinc-500">Landscape Classification:</span>
+                      <div className="grid grid-cols-2 gap-1 text-[10px]">
+                        <div className="bg-amber-100/70 p-1 brutal-border-sm">
+                          Urban: <strong>{dataset.metadata.landscape_classification.urban_pct}%</strong>
+                        </div>
+                        <div className="bg-emerald-100/70 p-1 brutal-border-sm">
+                          Veg: <strong>{dataset.metadata.landscape_classification.vegetation_pct}%</strong>
+                        </div>
+                        <div className="bg-orange-100/70 p-1 brutal-border-sm">
+                          Bare: <strong>{dataset.metadata.landscape_classification.bare_ground_pct}%</strong>
+                        </div>
+                        <div className="bg-sky-100/70 p-1 brutal-border-sm">
+                          Water: <strong>{dataset.metadata.landscape_classification.water_pct}%</strong>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

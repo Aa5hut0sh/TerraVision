@@ -68,6 +68,12 @@ export interface NormalizedMetadata {
   width: number;
   height: number;
   source_image: string;
+  landscape_classification?: {
+    urban_pct: number;
+    vegetation_pct: number;
+    bare_ground_pct: number;
+    water_pct: number;
+  } | null;
 }
 
 export interface Stats {
