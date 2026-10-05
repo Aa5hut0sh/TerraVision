@@ -33,21 +33,41 @@ export async function createJob(target: File | string): Promise<string> {
 export async function pollJob(
   jobId: string,
   onUpdate?: (job: JobResponse) => void,
-  intervalMs = 450
+  intervalMs = 500
 ): Promise<JobResponse> {
-  while (true) {
-    const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`);
-    if (!res.ok) {
-      throw new Error(`Polling failed with status ${res.status}`);
-    }
-    const job: JobResponse = await res.json();
-    if (onUpdate) onUpdate(job);
+  let consecutiveErrors = 0;
+  const maxRetries = 6;
 
-    if (job.status === 'done') {
-      return job;
-    }
-    if (job.status === 'error') {
-      throw new Error(job.error || 'Job failed during execution');
+  while (true) {
+    try {
+      const res = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`);
+      if (!res.ok) {
+        consecutiveErrors++;
+        if (consecutiveErrors >= maxRetries) {
+          throw new Error(`Polling failed with status ${res.status}`);
+        }
+        // Wait briefly before retrying transient status (e.g. 404 race condition or worker switch)
+        await new Promise(r => setTimeout(r, 600));
+        continue;
+      }
+
+      // Successful response resets error counter
+      consecutiveErrors = 0;
+      const job: JobResponse = await res.json();
+      if (onUpdate) onUpdate(job);
+
+      if (job.status === 'done') {
+        return job;
+      }
+      if (job.status === 'error') {
+        throw new Error(job.error || 'Job failed during execution');
+      }
+    } catch (err: any) {
+      if (consecutiveErrors >= maxRetries) {
+        throw err;
+      }
+      consecutiveErrors++;
+      await new Promise(r => setTimeout(r, 600));
     }
 
     await new Promise(r => setTimeout(r, intervalMs));

@@ -29,10 +29,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 UPLOADS_DIR = DATA_DIR / "uploads"
 RESULTS_DIR = DATA_DIR / "results"
+JOBS_DIR = DATA_DIR / "jobs"
 FRONTEND_DIST = BASE_DIR.parent / "frontend" / "dist"
 
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+JOBS_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="TerraVision API", version="2.0.0")
 
@@ -45,6 +47,77 @@ app.add_middleware(
 )
 
 JOBS: Dict[str, Dict[str, Any]] = {}
+
+def save_job_state(job_id: str, job_data: dict):
+    """Persists job state both to in-memory cache and to shared disk for cross-worker consistency."""
+    JOBS[job_id] = job_data
+    try:
+        job_file = JOBS_DIR / f"{job_id}.json"
+        tmp_file = JOBS_DIR / f"{job_id}.tmp"
+        with open(tmp_file, "w", encoding="utf-8") as f:
+            json.dump(job_data, f)
+        tmp_file.replace(job_file)
+    except Exception as e:
+        print(f"[warning] Failed to persist job {job_id} to disk: {e}")
+
+def get_job_state(job_id: str) -> Optional[dict]:
+    """Retrieves job state from memory, shared disk file, or recovers from completed result directory."""
+    # 1. Fast in-memory lookup
+    if job_id in JOBS:
+        return JOBS[job_id]
+
+    # 2. Check persistent disk job file (guarantees cross-worker consistency)
+    job_file = JOBS_DIR / f"{job_id}.json"
+    if job_file.exists():
+        try:
+            with open(job_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                JOBS[job_id] = data
+                return data
+        except Exception:
+            pass
+
+    # 3. Check if job results already exist in RESULTS_DIR (handles reloads/restarts)
+    res_dir = RESULTS_DIR / job_id
+    meta_file = res_dir / "metadata.json"
+    if res_dir.exists() and meta_file.exists():
+        try:
+            with open(meta_file, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+            mode = meta.get("mode", "relative")
+            is_abs = (mode == "absolute")
+            filename = meta.get("source_image", "image.png")
+            is_real = meta.get("inference_mode") == "neural_network"
+
+            result_files = {
+                "rgb": f"/api/results/{job_id}/rgb.png",
+                "elevation": f"/api/results/{job_id}/{meta.get('data_file', 'height_agl.npy')}",
+                "metadata": f"/api/results/{job_id}/metadata.json",
+                "terrain": f"/api/results/{job_id}/terrain_elevation.npy" if is_abs else None
+            }
+            stages = ABSOLUTE_STAGES if is_abs else RELATIVE_STAGES
+            reconstructed_job = {
+                "job_id": job_id,
+                "status": "done",
+                "kind": "geotiff" if is_abs else "png",
+                "filename": filename,
+                "stages": stages,
+                "stage_index": len(stages),
+                "result": {
+                    "input_kind": "geotiff" if is_abs else "png",
+                    "mode": mode,
+                    "original_filename": filename,
+                    "dummy": not is_real,
+                    "files": result_files
+                },
+                "error": None
+            }
+            save_job_state(job_id, reconstructed_job)
+            return reconstructed_job
+        except Exception:
+            pass
+
+    return None
 
 RELATIVE_STAGES = [
     "Ingesting imagery",
@@ -202,16 +275,18 @@ def execute_pipeline(job_id: str, kind: str, upload_path: Optional[str] = None) 
 
 
 async def run_pipeline_task(job_id: str):
-    job = JOBS.get(job_id)
+    job = get_job_state(job_id)
     if not job:
         return
     job["status"] = "running"
+    save_job_state(job_id, job)
     stages = job["stages"]
 
     try:
         # Step through stages with brief pacing for visual feedback
         for idx in range(len(stages) - 1):
             job["stage_index"] = idx
+            save_job_state(job_id, job)
             await asyncio.sleep(0.4)
 
         # Execute full real pipeline
@@ -228,9 +303,11 @@ async def run_pipeline_task(job_id: str):
             "dummy": not is_real,
             "files": result_files
         }
+        save_job_state(job_id, job)
     except Exception as e:
         job["status"] = "error"
         job["error"] = str(e)
+        save_job_state(job_id, job)
         print(f"[error] Pipeline failed for job {job_id}: {e}")
 
 
@@ -285,7 +362,7 @@ async def create_job(
 
     stages = ABSOLUTE_STAGES if kind == "geotiff" else RELATIVE_STAGES
 
-    JOBS[job_id] = {
+    initial_job = {
         "job_id": job_id,
         "status": "queued",
         "kind": kind,
@@ -296,6 +373,7 @@ async def create_job(
         "result": None,
         "error": None
     }
+    save_job_state(job_id, initial_job)
 
     background_tasks.add_task(run_pipeline_task, job_id)
     return {"job_id": job_id}
@@ -303,7 +381,7 @@ async def create_job(
 
 @app.get("/api/jobs/{job_id}")
 def get_job(job_id: str):
-    job = JOBS.get(job_id)
+    job = get_job_state(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return {
