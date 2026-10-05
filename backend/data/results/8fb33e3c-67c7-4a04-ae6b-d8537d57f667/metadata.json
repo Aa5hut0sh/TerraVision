@@ -1,0 +1,44 @@
+{
+  "source_image": "D:\\SIH_26\\Sample\\DC_01_25_RGB.h5",
+  "model_checkpoint": "D:\\SIH_26\\PS_2\\checkpoints\\run_1500tiles_v2\\best.pt",
+  "output_type": "above_ground_height",
+  "units": "meters",
+  "coordinate_reference_system": "EPSG:32644 (DUMMY)",
+  "georeferenced": true,
+  "height_min_m": 1201.343017578125,
+  "height_max_m": 1252.1749267578125,
+  "height_mean_m": 1226.420654296875,
+  "height_median_m": 1225.04443359375,
+  "width": 518,
+  "height": 518,
+  "channels": 1,
+  "data_file": "height_absolute.npy",
+  "rgb_file": "rgb.png",
+  "grayscale_displacement_mapping": {
+    "formula": "gray = round((height - height_min_m) / (height_max_m - height_min_m) * 255)",
+    "note": "lossy - use height_agl.npy for anything numeric"
+  },
+  "training_preprocessing": {
+    "resize_rgb_mode": "bilinear",
+    "normalization": "imagenet_mean_std_rgb",
+    "out_size": 518
+  },
+  "future_part2_fields": {
+    "terrain_source": null,
+    "terrain_units": "meters",
+    "absolute_elevation_available": false,
+    "geotransform_available": false,
+    "vertical_reference": "AGL"
+  },
+  "mode": "absolute",
+  "vertical_reference": "absolute_elevation",
+  "terrain_file": "terrain_elevation.npy",
+  "pixel_size_m": 1.25,
+  "bounds": [
+    77.209,
+    28.6139,
+    77.2155,
+    28.6195
+  ],
+  "terrain_source": "SRTM 30m (Synthetic Demo Calibration)"
+}
